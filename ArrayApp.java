@@ -22,22 +22,65 @@ public class ArrayApp {
     }
 }
 
-//Ordered Array
-class OrdArray
-{
-    private long[] a;
-    private int nElems;
 
-    public OrdArray() {}
-    public OrdArray(int max)
-    {
-        a = new long[max];
-        nElems = 0;
+abstract class Array{
+    Random random = new Random();
+    protected long[] a;
+    protected int nElems;
+
+    protected Array(){}
+    protected Array(int size){
+        a = new long[size];
+        nElems = size;
     }
-    public int size()
-    { return nElems; }
+
+    public int size() {
+        return nElems;
+    }
     public long getEl(int index){
         return a[index];
+    }
+    public void insertInIndex(int index, long temp){
+        a[index] = temp;
+    }
+    public void display() {
+        for(int j=0; j<nElems; j++)
+            System.out.print(a[j] + " ");
+        System.out.print("Всего элементов " + nElems);
+        System.out.println("");
+    }
+    public void swap(int one, int two){
+        long temp = a[one];
+        a[one] = a[two];
+        a[two] = temp;
+    }
+    public void fillWRandNums(int limit){
+        for(int index = 0; index < nElems; index++){
+            a[index] = random.nextLong(limit);
+        }
+    }
+    public void fillWNumsDesc(){
+        for(int index = 0; index < nElems; index++){
+            a[index] = nElems - index - 1;
+        }
+    }
+    public void fillWNumsAsc(){
+        for(int index = 0; index < nElems; index++){
+            a[index] = index;
+        }
+    }
+    abstract public int find(long searchKey);
+    abstract public boolean delete(long value);
+    abstract public void insert(long value);
+}
+
+
+//Ordered Array
+class OrdArray extends Array
+{
+    public OrdArray(int max)
+    {
+        super(max);
     }
 
     public int find(long searchKey)
@@ -51,7 +94,7 @@ class OrdArray
             if(a[curIn]==searchKey)
                 return curIn;
             else if(lowerBound > upperBound)
-                return nElems;
+                return -1;
             else
             {
                 if(a[curIn] < searchKey)
@@ -97,13 +140,6 @@ class OrdArray
         }
     }
 
-    public void display()
-    {
-        for(int j=0; j<nElems; j++)
-            System.out.print(a[j] + " ");
-        System.out.println("");
-    }
-
     public void merge(OrdArray firstArr, OrdArray secondArr){
         int newSize =  firstArr.size() + secondArr.size();
         a = new long[newSize];
@@ -136,30 +172,32 @@ class OrdArray
 
         this.nElems = newIndex;
     }
+
+    public void swap(int one, int two)
+    {
+        long temp = a[one];
+        a[one] = a[two];
+        a[two] = temp;
+    }
 }
 
 
 //Default Array
-class HighArray {
-    private long[] a;
-    private int nElems;
-
-    public HighArray(int max)
-    {
-        a = new long[max];
-        nElems = 0;
+class HighArray extends Array {
+    public HighArray(){}
+    public HighArray(int max) {
+        super(max);
     }
-    public boolean find(long searchKey)
+
+    public int find(long searchKey)
     {
         int j;
         for(j=0; j<nElems; j++)
             if(a[j] == searchKey)
-                break;
-        if(j == nElems)
-            return false;
-        else
-            return true;
+                return j;
+        return -1;
     }
+
 
     public void insert(long value)
     {
@@ -182,13 +220,6 @@ class HighArray {
             nElems--;
             return true;
         }
-    }
-
-    public void display()
-    {
-        for(int j=0; j<nElems; j++)
-            System.out.print(a[j] + " ");
-        System.out.println("всего элементов " + nElems);
     }
 
     public long removeMax(){
@@ -220,6 +251,7 @@ class HighArray {
         a = arr;
         this.nElems = uniqueIndex;
     }
+
 }
 
 
