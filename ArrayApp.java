@@ -31,7 +31,7 @@ abstract class Array{
     protected Array(){}
     protected Array(int size){
         a = new long[size];
-        nElems = size;
+        nElems = 0;
     }
 
     public int size() {
@@ -55,9 +55,10 @@ abstract class Array{
         a[two] = temp;
     }
     public void fillWRandNums(int limit){
-        for(int index = 0; index < nElems; index++){
+        for(int index = 0; index < a.length; index++){
             a[index] = random.nextLong(limit);
         }
+        nElems = a.length;
     }
     public void fillWNumsDesc(){
         for(int index = 0; index < nElems; index++){
@@ -69,15 +70,26 @@ abstract class Array{
             a[index] = index;
         }
     }
+    public long meridian(){
+        long meridian = 0;
+        if (size() % 2 == 1){
+            return getEl(size() / 2);
+        } else{
+            return (getEl(size() / 2) + getEl((size() / 2)-1))/2;
+        }
+    }
     abstract public int find(long searchKey);
     abstract public boolean delete(long value);
     abstract public void insert(long value);
+
 }
 
 
 //Ordered Array
 class OrdArray extends Array
 {
+    public OrdArray(){}
+
     public OrdArray(int max)
     {
         super(max);
@@ -118,22 +130,20 @@ class OrdArray extends Array
             }
         }
 
-        for (int k = nElems; k > left; k--) {
+        for (int k = nElems-1; k > left; k--) {
             a[k] = a[k - 1];
         }
 
-        a[left] = value;
+        a[left-1] = value;
         nElems++;
     }
 
-    public boolean delete(long value)
-    {
+    public boolean delete(long value) {
         int j = find(value);
-        if(j==nElems) // Найти не удалось
+        if(j==nElems)
             return false;
-        else // Элемент найден
-        {
-            for(int k=j; k<nElems; k++) // Перемещение последующих элементов
+        else{
+            for(int k=j; k<nElems; k++)
                 a[k] = a[k+1];
             nElems--;
             return true;
@@ -173,12 +183,7 @@ class OrdArray extends Array
         this.nElems = newIndex;
     }
 
-    public void swap(int one, int two)
-    {
-        long temp = a[one];
-        a[one] = a[two];
-        a[two] = temp;
-    }
+
 }
 
 
@@ -250,6 +255,41 @@ class HighArray extends Array {
         long arr[] = Arrays.copyOfRange(a, 0,uniqueIndex );
         a = arr;
         this.nElems = uniqueIndex;
+    }
+}
+
+class QuickSelect {
+    public static long quickSelect(Array arr, int k) {
+        return quickSelect(arr, 0, arr.size() - 1, k);
+    }
+
+    private static long quickSelect(Array arr, int left, int right, int k) {
+        if (left == right) return arr.getEl(left);
+
+        int pivotIndex = partition(arr, left, right);
+
+        if (k == pivotIndex) {
+            return arr.getEl(k);
+        } else if (k < pivotIndex) {
+            return quickSelect(arr, left, pivotIndex - 1, k);
+        } else {
+            return quickSelect(arr, pivotIndex + 1, right, k);
+        }
+    }
+
+    private static int partition(Array arr, int left, int right) {
+        long pivot = arr.getEl(right); // Можно рандомизировать!
+        int i = left;
+
+        for (int j = left; j < right; j++) {
+            if (arr.getEl(j) <= pivot) {
+                arr.swap(i, j);
+                i++;
+            }
+        }
+
+        arr.swap(i, right); // Ставим pivot на своё место
+        return i;
     }
 
 }
