@@ -4,24 +4,28 @@ import static algorithmsnstructures.QuickSelect.quickSelect;
 
 class SimpleSortsApp {
     public static void main(String[] args) {
-        HighArray bubbleArr, insertionArr;
+        int SIZE = 10000;
 
-        bubbleArr = new HighArray(20);
-        insertionArr = new HighArray(20);
-        bubbleArr.fillWRandNums(100);
-        insertionArr.fillWRandNums(100);
+        HighArray arr0 = new HighArray(SIZE);
+        HighArray arr1 = new HighArray(SIZE);
 
+        arr0.fillWRandNums(SIZE);
+        arr1.fillWRandNums(SIZE);
 
+        Timer timer = new Timer();
 
+        timer.start();
+        singleThreadOddEvenSort(arr0);
+        timer.stop();
+        System.out.println("single thread sorting took " + timer.getTime());
 
-        bubbleSort(bubbleArr);
-        insertionSort(insertionArr);
-
-
-
+        timer.start();
+        multiThreadOddEvenSort(arr1);
+        timer.stop();
+        System.out.println("multi thread sorting took " + timer.getTime());
     }
 
-    public static void oddEvenSort(Array array){
+    public static void singleThreadOddEvenSort(Array array){
         HighArray oddArray, evenArray;
 
         int newSize = array.size() / 2;
@@ -47,6 +51,63 @@ class SimpleSortsApp {
 
         insertionSort(evenArray);
         insertionSort(oddArray);
+
+        int oddIndex = 0, evenIndex = 0;
+        for(int index = 0; index <array.size(); index++){
+            if (oddSize != oddIndex && evenSize != evenIndex) {
+                long oddVal = oddArray.getEl(oddIndex);
+                long evenVal = evenArray.getEl(evenIndex);
+                array.insertInIndex(index, (evenVal < oddVal) ? evenVal : oddVal);
+                if (evenVal < oddVal) {
+                    evenIndex++;
+                } else {
+                    oddIndex++;
+                }
+            } else if(oddIndex<oddSize){
+                array.insertInIndex(index, oddArray.getEl(oddIndex++));
+            } else{
+                array.insertInIndex(index, evenArray.getEl(evenIndex++));
+            }
+        }
+    }
+
+    public static void multiThreadOddEvenSort(Array array){
+        HighArray oddArray, evenArray;
+
+        int newSize = array.size() / 2;
+        int oddSize, evenSize;
+        if(array.size() % 2 == 0){
+            oddSize = newSize;
+            evenSize = newSize;
+        } else {
+            oddSize = newSize;
+            evenSize = newSize+1;
+        }
+
+        oddArray = new HighArray(oddSize);
+        evenArray = new HighArray(evenSize);
+
+        for(int index = 0; index < array.size(); index++){
+            if(index%2 == 0){
+                evenArray.insert(array.getEl(index));
+            } else{
+                oddArray.insert(array.getEl(index));
+            }
+        }
+
+        Thread evenSortThread = new Thread(() -> insertionSort(evenArray));
+        Thread oddSortThread = new Thread(() -> insertionSort(oddArray));
+
+        evenSortThread.start();
+        oddSortThread.start();
+
+        try {
+            evenSortThread.join();
+            oddSortThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
 
         int oddIndex = 0, evenIndex = 0;
         for(int index = 0; index <array.size(); index++){
@@ -110,8 +171,8 @@ class SimpleSortsApp {
                     permutationCount+=2;
                     array.swap(in, in + 1);
             }
-        System.out.println("amount of comparison is " + comparisonCount);
-        System.out.println("amount of permutation is " + permutationCount);
+//        System.out.println("amount of comparison is " + comparisonCount);
+//        System.out.println("amount of permutation is " + permutationCount);
     }
 
     public static void insertionSort(Array array) {
@@ -130,12 +191,32 @@ class SimpleSortsApp {
                     break;
                 }
             }
-            //comparisonCount++;
             array.insertInIndex(in, temp);
         }
 
-        System.out.println("amount of comparison is " + comparisonCount);
-        System.out.println("amount of permutation is " + permutationCount);
+//        System.out.println("amount of comparison is " + comparisonCount);
+//        System.out.println("amount of permutation is " + permutationCount);
+    }
+
+    public static void insertionSortWDubsDeleting(Array array){
+        int in, out, dups = 0;
+        for(out=1; out<array.size(); out++) {
+            long temp = array.getEl(out);
+            in = out;
+            while(in>0) {
+                if (array.getEl(in - 1) > temp) {
+                    array.insertInIndex(in, array.getEl(in - 1));
+                    --in;
+                } else if(array.getEl(in-1) == temp){
+                    array.insertInIndex(in-1, -1);
+                    ++dups;
+                } else{
+                    break;
+                }
+            }
+            array.insertInIndex(in, temp);
+        }
+        array.cutUselessElements();
     }
 
     public static void selectionSort(Array array) {

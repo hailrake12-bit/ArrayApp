@@ -78,6 +78,23 @@ abstract class Array{
             return (getEl(size() / 2) + getEl((size() / 2)-1))/2;
         }
     }
+    public void cutUselessElements(){
+        int uselessElements = 0;
+
+        for(long element : a){
+            if(element<0) uselessElements++;
+        }
+
+        long[] newArr = new long[nElems-uselessElements];
+
+        int newArrIndex = 0;
+        for(int oldIndex = uselessElements; oldIndex < nElems; oldIndex++){
+            newArr[newArrIndex++] = a[oldIndex];
+        }
+
+        a = newArr;
+        nElems = newArrIndex;
+    }
     abstract public int find(long searchKey);
     abstract public boolean delete(long value);
     abstract public void insert(long value);
